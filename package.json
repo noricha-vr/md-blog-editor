@@ -1,0 +1,22 @@
+{
+  "name": "md-blog-editor",
+  "version": "1.0.0",
+  "description": "シンプルで使いやすいマークダウンエディター",
+  "main": "index.html",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy .",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "markdown",
+    "editor",
+    "blog",
+    "writing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

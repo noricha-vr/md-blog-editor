@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブログエディター</title>
+    
+    <!-- TUI Editor CSS -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1a202c;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        .editor-section {
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .form-group {
+            height: 100%;
+        }
+        
+        .form-group label {
+            display: none;
+        }
+        
+        .editor-container {
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .actions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            align-items: flex-start;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        .history-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 24px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 300px;
+            margin-top: 8px;
+        }
+        
+        .history-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 0.875rem;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+        
+        .status.success {
+            background: #f0fff4;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .status.error {
+            background: #fff5f5;
+            color: #742a2a;
+            border: 1px solid #feb2b2;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 16px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .header p {
+                font-size: 0.75rem;
+            }
+            
+            .actions {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding: 12px 16px;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+                font-size: 0.75rem;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 ブログエディター</h1>
+            <p>シンプルで使いやすいマークダウンエディターです</p>
+        </div>
+        
+        <div class="editor-section">
+            <div class="form-group">
+                <label>マークダウンエディター</label>
+                <div class="editor-container">
+                    <div id="editor"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="copyMarkdown()">
+                📋 マークダウンをコピー
+            </button>
+            <button class="btn btn-secondary" onclick="toggleHistoryRestore()">
+                🕐 履歴復元
+            </button>
+            <div id="historyDropdown" class="history-dropdown" style="display: none;">
+                <select id="historySelect" class="history-select">
+                    <option value="">時間を選択してください</option>
+                </select>
+                <button class="btn btn-primary btn-small" onclick="restoreFromHistory()">復元</button>
+                <button class="btn btn-secondary btn-small" onclick="cancelHistoryRestore()">キャンセル</button>
+            </div>
+        </div>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- TUI Editor JS -->
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    
+    <script>
+        // エディターの初期化
+        const editor = new toastui.Editor({
+            el: document.querySelector('#editor'),
+            height: '100vh',
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            language: 'ja-JP',
+            placeholder: 'ここにマークダウンを書いてください...',
+            toolbarItems: [
+                ['heading', 'bold', 'italic', 'strike'],
+                ['hr', 'quote'],
+                ['ul', 'ol', 'task', 'indent', 'outdent'],
+                ['table', 'image', 'link'],
+                ['code', 'codeblock'],
+                ['scrollSync']
+            ],
+            hooks: {
+                addImageBlobHook: (blob, callback) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        callback(e.target.result, 'image');
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+        });
+
+        // 履歴保存用の変数
+        let lastSaveTime = 0;
+        let lastContent = '';
+        let saveTimer = null;
+
+        // 履歴保存機能
+        function saveToHistory() {
+            const content = editor.getMarkdown().trim();
+            const now = Date.now();
+            
+            // 内容が変わっていない場合はスキップ
+            if (content === lastContent) return;
+            
+            // 1分以内の場合はスキップ
+            if (now - lastSaveTime < 60000) return;
+            
+            if (content) {
+                const histories = JSON.parse(localStorage.getItem('editorHistory') || '[]');
+                
+                const historyEntry = {
+                    timestamp: now,
+                    content: content,
+                    date: new Date(now).toLocaleString('ja-JP')
+                };
+                
+                histories.unshift(historyEntry);
+                
+                // 最新10件のみ保持
+                if (histories.length > 10) {
+                    histories.splice(10);
+                }
+                
+                localStorage.setItem('editorHistory', JSON.stringify(histories));
+                lastSaveTime = now;
+                lastContent = content;
+                
+                console.log('履歴を保存しました:', new Date(now).toLocaleString('ja-JP'));
+            }
+        }
+
+        // エディターの変更を監視
+        editor.addHook('change', function() {
+            // タイマーをリセット
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+            }
+            
+            // 1秒後に保存チェック（連続入力を考慮）
+            saveTimer = setTimeout(saveToHistory, 1000);
+        });
+
+        // マークダウンコピー機能
+        function copyMarkdown() {
+            const markdown = editor.getMarkdown();
+            
+            if (!markdown.trim()) {
+                showStatus('コピーする内容がありません', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(markdown).then(() => {
+                showStatus('マークダウンをクリップボードにコピーしました');
+            }).catch(() => {
+                // フォールバック
+                const textArea = document.createElement('textarea');
+                textArea.value = markdown;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatus('マークダウンをクリップボードにコピーしました');
+            });
+        }
+
+        // 履歴復元UI表示
+        function toggleHistoryRestore() {
+            const dropdown = document.getElementById('historyDropdown');
+            const select = document.getElementById('historySelect');
+            
+            if (dropdown.style.display === 'none') {
+                const histories = JSON.parse(localStorage.getItem('editorHistory') || '[]');
+                
+                // ドロップダウンをクリア
+                select.innerHTML = '<option value="">時間を選択してください</option>';
+                
+                if (histories.length === 0) {
+                    showStatus('履歴がありません', 'error');
+                    return;
+                }
+                
+                // 履歴をドロップダウンに追加
+                histories.forEach((history, index) => {
+                    const now = Date.now();
+                    const diffMinutes = Math.floor((now - history.timestamp) / 60000);
+                    const timeText = diffMinutes < 1 ? '1分未満前' : `${diffMinutes}分前`;
+                    
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${timeText} (${history.date})`;
+                    select.appendChild(option);
+                });
+                
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+
+        // 履歴復元実行
+        function restoreFromHistory() {
+            const select = document.getElementById('historySelect');
+            const selectedIndex = select.value;
+            
+            if (selectedIndex === '') {
+                showStatus('時間を選択してください', 'error');
+                return;
+            }
+            
+            const histories = JSON.parse(localStorage.getItem('editorHistory') || '[]');
+            const selectedHistory = histories[parseInt(selectedIndex)];
+            
+            if (selectedHistory) {
+                editor.setMarkdown(selectedHistory.content);
+                showStatus(`${selectedHistory.date}の状態に復元しました`);
+                cancelHistoryRestore();
+            }
+        }
+
+        // 履歴復元キャンセル
+        function cancelHistoryRestore() {
+            document.getElementById('historyDropdown').style.display = 'none';
+        }
+
+        // ステータス表示用関数
+        function showStatus(message, type = 'success') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // ページ離脱時の確認
+        window.addEventListener('beforeunload', function(e) {
+            const content = editor.getMarkdown();
+            if (content.trim()) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // 外部クリック時に履歴ドロップダウンを閉じる
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('historyDropdown');
+            const historyButton = e.target.closest('button[onclick="toggleHistoryRestore()"]');
+            const dropdownArea = e.target.closest('#historyDropdown');
+            
+            if (!historyButton && !dropdownArea && dropdown.style.display === 'block') {
+                cancelHistoryRestore();
+            }
+        });
+    </script>
+</body>
+</html>
