@@ -15,3 +15,8 @@ updates:
         applies-to: security-updates
         update-types: ["minor", "patch"]
     labels: ["dependencies"]
+    cooldown:
+      default-days: 5
+      semver-major-days: 7
+      semver-minor-days: 3
+      semver-patch-days: 3
