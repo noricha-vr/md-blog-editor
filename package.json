@@ -17,6 +17,12 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "4.147.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }
