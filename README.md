@@ -19,10 +19,12 @@
 
 ## 開発・デプロイ
 
+Node.js 22 以上と npm が必要です。
+
 ### ローカル開発
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
